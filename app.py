@@ -31,26 +31,16 @@ except Exception:
 import requests
 
 
+from groq import Groq
+import streamlit as st
 
+GROQ_API_KEY = st.secrets.get("GROQ_API_KEY")
 
-HF_API_TOKEN = st.secrets.get("HF_API_TOKEN")
-
-if not HF_API_TOKEN:
-    st.error("Hugging Face API token missing")
+if not GROQ_API_KEY:
+    st.error("Groq API key missing")
     st.stop()
 
-HF_CHAT_URL = "https://router.huggingface.co/v1/chat/completions"
-HF_MODEL = "openchat/openchat-3.5-0106"
-
-HF_HEADERS = {
-    "Authorization": f"Bearer {HF_API_TOKEN}",
-    "Content-Type": "application/json"
-}
-
-# HF_MODEL_URL = (
-#     "https://router.huggingface.co/hf-inference/models/"
-#     "mistralai/Mistral-7B-Instruct-v0.2"
-# )
+groq_client = Groq(api_key=GROQ_API_KEY)
 #----------------------------------------------------------------------------------------------------------
 
 st.set_page_config(page_title="Forecasting (Prophet & SARIMAX)", layout="wide")
@@ -111,51 +101,41 @@ Test period:
 {test.index.min().date()} to {test.index.max().date()}
 
 Forecast accuracy:
-- MAE = {mae:.2f}
-- RMSE = {rmse:.2f}
-- MAPE = {mape:.2f}%
+- MAE: {mae:.2f}
+- RMSE: {rmse:.2f}
+- MAPE: {mape:.2f}%
 
-Exogenous variables used:
+Exogenous variables:
 {exog_cols if exog_cols else "None"}
 
 Recent forecast values:
 {forecast.tail(6).to_string()}
 
-Explain:
-1. Demand trend and seasonality
+Explain clearly:
+1. Trend and seasonality
 2. Forecast reliability
-3. Business risks
-4. Planning recommendations
+3. Risks or anomalies
+4. Business recommendations
 
-Use simple, business-friendly language.
+Use simple business language.
 """
 
-    payload = {
-        "model": HF_MODEL,
-        "messages": [
-            {"role": "system", "content": "You are a forecasting expert."},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 300
-    }
-
     try:
-        r = requests.post(
-            HF_CHAT_URL,
-            headers=HF_HEADERS,
-            json=payload,
-            timeout=60
+        completion = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": "You are a demand forecasting expert."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=300
         )
 
-        if r.status_code != 200:
-            return f"❌ LLM Error: {r.text}"
-
-        data = r.json()
-        return data["choices"][0]["message"]["content"]
+        return completion.choices[0].message.content
 
     except Exception as e:
         return f"❌ LLM Error: {str(e)}"
+
 
 
 
@@ -427,7 +407,7 @@ st.plotly_chart(fig2, use_container_width=True)
 st.subheader("🧠 AI Forecast Explanation")
 
 if st.button("Explain forecast in words"):
-    with st.spinner("LLM is thinking..."):
+    with st.spinner("Generating explanation..."):
         explanation = explain_with_llm(
             model_choice=model_choice,
             freq=freq,
