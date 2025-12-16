@@ -1,0 +1,33 @@
+# ----------------------------
+# Core dependencies
+# ----------------------------
+pandas
+numpy
+scikit-learn
+statsmodels
+
+# ----------------------------
+# Web app
+# ----------------------------
+streamlit
+
+# ----------------------------
+# Forecasting models
+# ----------------------------
+prophet       # rename of fbprophet; install via conda-forge if pip is slow
+
+# ----------------------------
+# Visualization
+# ----------------------------
+plotly        # for interactive charts
+
+# ----------------------------
+# Utility
+# ----------------------------
+tqdm
+openpyxl      # optional: Excel support
+
+openai
+
+
+requests
