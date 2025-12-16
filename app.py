@@ -7,6 +7,7 @@
 # • Interactive Plotly charts
 # • Download forecast CSV
 
+
 import io
 import numpy as np
 import pandas as pd
@@ -53,7 +54,7 @@ HF_HEADERS = {
 #----------------------------------------------------------------------------------------------------------
 
 st.set_page_config(page_title="Forecasting (Prophet & SARIMAX)", layout="wide")
-st.title("📈 Price Forecasting")
+st.title("📈 Demand Forecasting")
 # st.caption("Upload your time series, split into train/test, compare models, and download forecasts.")
 
 # -------------------------------
